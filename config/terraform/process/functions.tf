@@ -22,14 +22,6 @@ resource "google_cloudfunctions2_function" "poc_pubsub_handler" {
   location = var.region
   project  = var.project_id
 
-  # Espera a que los IAM bindings propaguen antes de crear el trigger Eventarc.
-  depends_on = [
-    google_project_iam_member.process_sa_eventarc_receiver,
-    google_project_iam_member.process_sa_tasks_enqueuer,
-    google_project_iam_member.process_sa_run_invoker,
-    google_service_account_iam_member.process_sa_act_as_self,
-  ]
-
   build_config {
     runtime     = "python312"
     entry_point = "cloud_function"
@@ -45,14 +37,14 @@ resource "google_cloudfunctions2_function" "poc_pubsub_handler" {
     max_instance_count    = 5
     available_memory      = "256M"
     timeout_seconds       = 60
-    service_account_email = google_service_account.process_functions_sa.email
+    service_account_email = var.sa_email
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
 
     environment_variables = {
       PROJECT_ID      = var.project_id
       REGION          = var.region
       QUEUE_NAME      = google_cloud_tasks_queue.poc_test_queue.name
-      SERVICE_ACCOUNT = google_service_account.process_functions_sa.email
+      SERVICE_ACCOUNT = var.sa_email
       # Referencia intra-contexto: ambas funciones están en process
       TASK_HANDLER_URL = google_cloudfunctions2_function.poc_task_handler.service_config[0].uri
     }
@@ -62,7 +54,7 @@ resource "google_cloudfunctions2_function" "poc_pubsub_handler" {
     trigger_region        = var.region
     event_type            = "google.cloud.pubsub.topic.v1.messagePublished"
     pubsub_topic          = google_pubsub_topic.poc_test_topic.id
-    service_account_email = google_service_account.process_functions_sa.email
+    service_account_email = var.sa_email
     retry_policy          = "RETRY_POLICY_RETRY"
   }
 }
@@ -74,10 +66,6 @@ resource "google_cloudfunctions2_function" "poc_task_handler" {
   name     = "poc-task-handler"
   location = var.region
   project  = var.project_id
-
-  depends_on = [
-    google_project_iam_member.process_sa_run_invoker,
-  ]
 
   build_config {
     runtime     = "python312"
@@ -94,7 +82,7 @@ resource "google_cloudfunctions2_function" "poc_task_handler" {
     max_instance_count    = 5
     available_memory      = "256M"
     timeout_seconds       = 60
-    service_account_email = google_service_account.process_functions_sa.email
+    service_account_email = var.sa_email
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
   }
 }

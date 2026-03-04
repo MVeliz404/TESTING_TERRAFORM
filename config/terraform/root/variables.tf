@@ -34,6 +34,16 @@ variable "output_topic_name" {
 # donde existe la database, no con la región de despliegue de la función.
 # Valores comunes: "nam5" (US multi-región), "eur3" (Europa), "us-central1".
 # Consultar con: gcloud firestore databases list
+variable "terraform_sa" {
+  description = "Service Account que Terraform impersona para desplegar. Tu cuenta personal necesita roles/iam.serviceAccountTokenCreator sobre ella."
+  type        = string
+}
+
+variable "sa_email" {
+  description = "Email de la SA que ejecutará las Cloud Functions (gestionada manualmente en GCP)"
+  type        = string
+}
+
 variable "firestore_location" {
   description = "Región de la base de datos Firestore (para el trigger Eventarc)"
   type        = string

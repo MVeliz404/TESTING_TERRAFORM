@@ -4,7 +4,7 @@
 
 output "service_account_email" {
   description = "SA del contexto root"
-  value       = google_service_account.root_functions_sa.email
+  value       = var.sa_email
 }
 
 output "source_bucket_name" {

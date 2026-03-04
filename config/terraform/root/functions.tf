@@ -16,15 +16,6 @@ resource "google_cloudfunctions2_function" "poc_firestore_listener" {
   location = var.region
   project  = var.project_id
 
-  # Espera a que los IAM bindings propaguen antes de crear el trigger Eventarc.
-  # Sin esto, GCP puede rechazar la creación con 403 por race condition.
-  depends_on = [
-    google_project_iam_member.root_sa_eventarc_receiver,
-    google_project_iam_member.root_sa_datastore_viewer,
-    google_project_iam_member.root_sa_pubsub_publisher,
-    google_project_iam_member.root_sa_run_invoker,
-  ]
-
   build_config {
     runtime     = "python312"
     entry_point = "cloud_function"
@@ -40,7 +31,7 @@ resource "google_cloudfunctions2_function" "poc_firestore_listener" {
     max_instance_count    = 5
     available_memory      = "256M"
     timeout_seconds       = 60
-    service_account_email = google_service_account.root_functions_sa.email
+    service_account_email = var.sa_email
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
 
     environment_variables = {
@@ -55,7 +46,7 @@ resource "google_cloudfunctions2_function" "poc_firestore_listener" {
     # no con var.region (región de la función). Consultar: gcloud firestore databases list
     trigger_region        = var.firestore_location
     event_type            = "google.cloud.firestore.document.v1.written"
-    service_account_email = google_service_account.root_functions_sa.email
+    service_account_email = var.sa_email
     retry_policy          = "RETRY_POLICY_DO_NOT_RETRY"
 
     event_filters {
