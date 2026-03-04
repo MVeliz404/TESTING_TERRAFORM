@@ -1,0 +1,61 @@
+# =============================================================================
+# functions.tf — context-root
+# Cloud Functions del contexto root
+#
+# Función: poc-firestore-listener
+#   Trigger : Eventarc — Firestore document.v1.written
+#   Colección: poc_test_events/{docId}
+#   Acción  : Log del doc + publica en poc-test-topic (propiedad de context-process)
+#
+# NOTA: TOPIC_NAME es un string plano (var.output_topic_name).
+# No hay referencia Terraform a context-process — el acoplamiento es solo en runtime.
+# =============================================================================
+
+resource "google_cloudfunctions2_function" "poc_firestore_listener" {
+  name     = "poc-firestore-listener"
+  location = var.region
+  project  = var.project_id
+
+  build_config {
+    runtime     = "python312"
+    entry_point = "cloud_function"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.root_source_code.name
+        object = google_storage_bucket_object.poc_firestore_listener.name
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count    = 5
+    available_memory      = "256M"
+    timeout_seconds       = 60
+    service_account_email = google_service_account.root_functions_sa.email
+    ingress_settings      = "ALLOW_INTERNAL_ONLY"
+
+    environment_variables = {
+      PROJECT_ID = var.project_id
+      # String plano — no referencia ningún recurso de context-process
+      TOPIC_NAME = var.output_topic_name
+    }
+  }
+
+  event_trigger {
+    trigger_region        = var.region
+    event_type            = "google.cloud.firestore.document.v1.written"
+    service_account_email = google_service_account.root_functions_sa.email
+    retry_policy          = "RETRY_POLICY_DO_NOT_RETRY"
+
+    event_filters {
+      attribute = "database"
+      value     = "(default)"
+    }
+
+    event_filters {
+      attribute = "document"
+      value     = "poc_test_events/{docId}"
+      operator  = "match-path-pattern"
+    }
+  }
+}

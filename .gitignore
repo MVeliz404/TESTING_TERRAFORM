@@ -1,0 +1,26 @@
+# Terraform state (nunca subir al repo)
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+
+# Directorio de ejecución de Terraform
+.terraform/
+.terraform.lock.hcl
+
+# Plan binario (contiene valores sensibles en texto plano)
+*.tfplan
+
+# Directorios de build internos (ZIPs generados por archive_file)
+# Uno por cada working directory de Terraform
+config/terraform/root/.build/
+config/terraform/process/.build/
+
+# Credenciales (por si acaso)
+*.json
+!package.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+config/terraform/environment/*.tfvars
