@@ -22,6 +22,7 @@ resource "google_cloudfunctions2_function" "poc_firestore_listener" {
     google_project_iam_member.root_sa_eventarc_receiver,
     google_project_iam_member.root_sa_datastore_viewer,
     google_project_iam_member.root_sa_pubsub_publisher,
+    google_project_iam_member.root_sa_run_invoker,
   ]
 
   build_config {

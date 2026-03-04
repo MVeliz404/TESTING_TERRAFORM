@@ -20,6 +20,9 @@ def cloud_function(cloud_event):
     print(f"Event Type: {cloud_event['type']}")
 
     data = cloud_event.data
+    # Eventarc entrega el payload como bytes — deserializar a dict antes de operar
+    if isinstance(data, (bytes, bytearray)):
+        data = json.loads(data)
     print("Payload completo del evento:")
     print(json.dumps(data, indent=2, default=str))
 

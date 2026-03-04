@@ -29,3 +29,10 @@ resource "google_project_iam_member" "root_sa_eventarc_receiver" {
   role    = "roles/eventarc.eventReceiver"
   member  = "serviceAccount:${google_service_account.root_functions_sa.email}"
 }
+
+# Eventarc invoca la Cloud Function (Cloud Run) con esta SA — necesita run.invoker
+resource "google_project_iam_member" "root_sa_run_invoker" {
+  project = var.project_id
+  role    = "roles/run.invoker"
+  member  = "serviceAccount:${google_service_account.root_functions_sa.email}"
+}
