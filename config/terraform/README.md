@@ -59,37 +59,65 @@ gcloud storage ls gs://tfstate-poc-matiaslab
 
 > Desplegar **siempre process primero** — es dueño del topic Pub/Sub que usa root.
 
-### context-process
+Usa el script `tf.sh` desde `config/terraform/`:
+
+```bash
+# Sintaxis
+./tf.sh <contexto> <ambiente> <acción>
+
+# Contextos : root | process
+# Ambientes : dev | cert | prod
+# Acciones  : init | plan | apply | destroy
+```
+
+### Flujo completo (primera vez)
+
+```bash
+cd config/terraform/
+
+# 1. Inicializar ambos contextos
+./tf.sh process dev init
+./tf.sh root    dev init
+
+# 2. Planificar (genera plan.tfplan en cada contexto)
+./tf.sh process dev plan
+./tf.sh root    dev plan
+
+# 3. Aplicar
+./tf.sh process dev apply
+./tf.sh root    dev apply
+```
+
+### Cambiar de ambiente
+
+```bash
+./tf.sh process cert init
+./tf.sh process cert plan
+./tf.sh process cert apply
+```
+
+### Destruir
+
+```bash
+# Orden inverso al despliegue
+./tf.sh root    dev destroy
+./tf.sh process dev destroy
+```
+
+### Comandos manuales (sin script)
+
+<details>
+<summary>Expandir</summary>
 
 ```bash
 cd config/terraform/process/
-
 terraform init -backend-config="prefix=dev/process"
 terraform fmt && terraform validate
 terraform plan -var-file="../environment/terraform.dev.tfvars" -out=plan.tfplan
 terraform apply plan.tfplan
 ```
 
-### context-root
-
-```bash
-cd config/terraform/root/
-
-terraform init -backend-config="prefix=dev/root"
-terraform fmt && terraform validate
-terraform plan -var-file="../environment/terraform.dev.tfvars" -out=plan.tfplan
-terraform apply plan.tfplan
-```
-
-### Cambiar de ambiente
-
-Mismo código, distinto `init` y distinto `.tfvars`:
-
-```bash
-terraform init -backend-config="prefix=cert/process" -reconfigure
-terraform plan -var-file="../environment/terraform.cert.tfvars" -out=plan.tfplan
-terraform apply plan.tfplan
-```
+</details>
 
 ---
 

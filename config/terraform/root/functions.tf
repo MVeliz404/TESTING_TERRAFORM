@@ -42,7 +42,9 @@ resource "google_cloudfunctions2_function" "poc_firestore_listener" {
   }
 
   event_trigger {
-    trigger_region        = var.region
+    # NOTA: trigger_region debe coincidir con la región de la Firestore database,
+    # no con var.region (región de la función). Consultar: gcloud firestore databases list
+    trigger_region        = var.firestore_location
     event_type            = "google.cloud.firestore.document.v1.written"
     service_account_email = google_service_account.root_functions_sa.email
     retry_policy          = "RETRY_POLICY_DO_NOT_RETRY"

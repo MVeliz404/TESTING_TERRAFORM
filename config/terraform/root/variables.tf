@@ -27,3 +27,15 @@ variable "output_topic_name" {
   type        = string
   default     = "poc-test-topic"
 }
+
+# Región de la base de datos Firestore.
+# IMPORTANTE: es independiente de var.region (región de la Cloud Function).
+# El trigger_region del Eventarc Firestore debe coincidir con la región
+# donde existe la database, no con la región de despliegue de la función.
+# Valores comunes: "nam5" (US multi-región), "eur3" (Europa), "us-central1".
+# Consultar con: gcloud firestore databases list
+variable "firestore_location" {
+  description = "Región de la base de datos Firestore (para el trigger Eventarc)"
+  type        = string
+  default     = "nam5"
+}

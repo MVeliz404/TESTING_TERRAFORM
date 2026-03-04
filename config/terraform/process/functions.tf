@@ -41,10 +41,10 @@ resource "google_cloudfunctions2_function" "poc_pubsub_handler" {
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
 
     environment_variables = {
-      PROJECT_ID       = var.project_id
-      REGION           = var.region
-      QUEUE_NAME       = google_cloud_tasks_queue.poc_test_queue.name
-      SERVICE_ACCOUNT  = google_service_account.process_functions_sa.email
+      PROJECT_ID      = var.project_id
+      REGION          = var.region
+      QUEUE_NAME      = google_cloud_tasks_queue.poc_test_queue.name
+      SERVICE_ACCOUNT = google_service_account.process_functions_sa.email
       # Referencia intra-contexto: ambas funciones están en process
       TASK_HANDLER_URL = google_cloudfunctions2_function.poc_task_handler.service_config[0].uri
     }
@@ -85,13 +85,4 @@ resource "google_cloudfunctions2_function" "poc_task_handler" {
     service_account_email = google_service_account.process_functions_sa.email
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
   }
-}
-
-# Binding a nivel Cloud Run — permite que la SA invoque poc-task-handler vía OIDC
-resource "google_cloud_run_v2_service_iam_member" "poc_task_handler_invoker" {
-  project  = var.project_id
-  location = var.region
-  name     = google_cloudfunctions2_function.poc_task_handler.name
-  role     = "roles/run.invoker"
-  member   = "serviceAccount:${google_service_account.process_functions_sa.email}"
 }
