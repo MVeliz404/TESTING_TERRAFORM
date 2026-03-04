@@ -16,6 +16,14 @@ resource "google_cloudfunctions2_function" "poc_firestore_listener" {
   location = var.region
   project  = var.project_id
 
+  # Espera a que los IAM bindings propaguen antes de crear el trigger Eventarc.
+  # Sin esto, GCP puede rechazar la creación con 403 por race condition.
+  depends_on = [
+    google_project_iam_member.root_sa_eventarc_receiver,
+    google_project_iam_member.root_sa_datastore_viewer,
+    google_project_iam_member.root_sa_pubsub_publisher,
+  ]
+
   build_config {
     runtime     = "python312"
     entry_point = "cloud_function"

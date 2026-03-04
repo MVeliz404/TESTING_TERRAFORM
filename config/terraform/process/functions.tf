@@ -22,6 +22,13 @@ resource "google_cloudfunctions2_function" "poc_pubsub_handler" {
   location = var.region
   project  = var.project_id
 
+  # Espera a que los IAM bindings propaguen antes de crear el trigger Eventarc.
+  depends_on = [
+    google_project_iam_member.process_sa_eventarc_receiver,
+    google_project_iam_member.process_sa_tasks_enqueuer,
+    google_project_iam_member.process_sa_run_invoker,
+  ]
+
   build_config {
     runtime     = "python312"
     entry_point = "cloud_function"
@@ -66,6 +73,10 @@ resource "google_cloudfunctions2_function" "poc_task_handler" {
   name     = "poc-task-handler"
   location = var.region
   project  = var.project_id
+
+  depends_on = [
+    google_project_iam_member.process_sa_run_invoker,
+  ]
 
   build_config {
     runtime     = "python312"
