@@ -85,8 +85,8 @@ cd "$CONTEXT_DIR"
 case "$ACTION" in
 
   init)
-    echo "→ terraform init (prefix=${ENV}/${CONTEXT})"
-    terraform init -backend-config="prefix=${ENV}/${CONTEXT}" -reconfigure
+    echo "→ terraform init (prefix=${CONTEXT})"
+    terraform init -backend-config="prefix=${CONTEXT}" -reconfigure
     ;;
 
   plan)
