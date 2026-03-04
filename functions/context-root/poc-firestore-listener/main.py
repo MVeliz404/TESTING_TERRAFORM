@@ -2,6 +2,7 @@ import json
 import os
 import functions_framework
 from google.cloud import pubsub_v1
+from google.events.cloud.firestore_v1.types import DocumentEventData
 
 
 publisher = pubsub_v1.PublisherClient()
@@ -19,17 +20,14 @@ def cloud_function(cloud_event):
     print(f"Event ID  : {cloud_event['id']}")
     print(f"Event Type: {cloud_event['type']}")
 
-    data = cloud_event.data
-    # Eventarc entrega el payload como bytes — deserializar a dict antes de operar
-    if isinstance(data, (bytes, bytearray)):
-        data = json.loads(data)
-    print("Payload completo del evento:")
-    print(json.dumps(data, indent=2, default=str))
+    # Eventarc entrega el payload de Firestore como protobuf binario
+    firestore_data = DocumentEventData.deserialize(cloud_event.data)
 
-    # Extraer campos del documento si existen
-    if "value" in data and "fields" in data.get("value", {}):
-        fields = data["value"]["fields"]
-        print(f"Campos del documento: {json.dumps(fields, indent=2, default=str)}")
+    # Convertir a dict serializable para logging
+    fields = {}
+    if firestore_data.value and firestore_data.value.fields:
+        fields = {k: str(v) for k, v in firestore_data.value.fields.items()}
+        print(f"Campos del documento: {json.dumps(fields, indent=2)}")
     else:
         print("El evento no contiene campos de documento (puede ser una eliminación).")
 
@@ -42,7 +40,7 @@ def cloud_function(cloud_event):
         message_body = json.dumps({
             "source": "poc-firestore-listener",
             "event_id": cloud_event["id"],
-            "document_fields": data.get("value", {}).get("fields", {}),
+            "document_fields": fields,
         }).encode("utf-8")
 
         future = publisher.publish(topic_path, message_body)
