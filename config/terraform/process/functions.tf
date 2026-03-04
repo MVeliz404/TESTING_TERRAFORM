@@ -4,7 +4,7 @@
 #
 # Función 1: poc-pubsub-handler
 #   Trigger : Eventarc — Pub/Sub messagePublished en poc-test-topic
-#   Acción  : Log del mensaje + crea tarea en poc-test-queue → poc-task-handler
+#   Acción  : Log del mensaje + crea tarea en poc-tasks-queue → poc-task-handler
 #
 # Función 2: poc-task-handler
 #   Trigger : HTTP — invocada por Cloud Tasks vía OIDC

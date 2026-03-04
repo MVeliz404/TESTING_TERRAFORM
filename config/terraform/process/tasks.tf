@@ -4,7 +4,7 @@
 # =============================================================================
 
 resource "google_cloud_tasks_queue" "poc_test_queue" {
-  name     = "poc-test-queue"
+  name     = "poc-tasks-queue"
   location = var.region
   project  = var.project_id
 
