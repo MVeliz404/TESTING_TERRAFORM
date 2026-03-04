@@ -29,3 +29,12 @@ resource "google_project_iam_member" "process_sa_run_invoker" {
   role    = "roles/run.invoker"
   member  = "serviceAccount:${google_service_account.process_functions_sa.email}"
 }
+
+# poc-pubsub-handler crea tareas con OIDC usando esta misma SA.
+# Para especificar una SA en el token OIDC de Cloud Tasks, el llamador
+# necesita iam.serviceAccounts.actAs sobre esa SA (aunque sea la misma).
+resource "google_service_account_iam_member" "process_sa_act_as_self" {
+  service_account_id = google_service_account.process_functions_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.process_functions_sa.email}"
+}

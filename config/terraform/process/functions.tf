@@ -27,6 +27,7 @@ resource "google_cloudfunctions2_function" "poc_pubsub_handler" {
     google_project_iam_member.process_sa_eventarc_receiver,
     google_project_iam_member.process_sa_tasks_enqueuer,
     google_project_iam_member.process_sa_run_invoker,
+    google_service_account_iam_member.process_sa_act_as_self,
   ]
 
   build_config {
